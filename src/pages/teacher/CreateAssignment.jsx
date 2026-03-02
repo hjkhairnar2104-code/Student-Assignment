@@ -1,41 +1,69 @@
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   createAssignment,
   createAssignmentWithPdf,
-} from "../../api/assignmentApi";
+} from "../../store/assignmentSlice";
+import { subjectMap } from "../../utils/subjectMap";
 
 export default function CreateAssignment() {
+  const dispatch = useDispatch();
+  const { loading } = useSelector((state) => state.assignment);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [year, setYear] = useState("");
   const [semester, setSemester] = useState("");
+  const [subject, setSubject] = useState("");
   const [deadline, setDeadline] = useState("");
   const [pdf, setPdf] = useState(null);
-  const [loading, setLoading] = useState(false);
+
+  // The subjectMap is now imported globally for consistency across components
+
+  // Determine available subjects based on selection
+  const availableSubjects = (year && semester && subjectMap[year]?.[semester]) || [];
+
+  // Reset subject when year or semester changes
+  const handleYearChange = (e) => {
+    setYear(e.target.value);
+    setSubject("");
+  };
+
+  const handleSemesterChange = (e) => {
+    setSemester(e.target.value);
+    setSubject("");
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+
+    // Map strings to integers to satisfy backend schema
+    const numYear = parseInt(year, 10);
+    const numSemester = parseInt(semester, 10);
 
     try {
       if (pdf) {
         const formData = new FormData();
         formData.append("title", title);
         formData.append("description", description);
-        formData.append("year", year);
-        formData.append("semester", semester);
+        formData.append("year", numYear);
+        formData.append("semester", numSemester);
+        formData.append("subject", subject);
         formData.append("deadline", deadline);
         formData.append("pdf", pdf);
 
-        await createAssignmentWithPdf(formData);
+        await dispatch(createAssignmentWithPdf(formData)).unwrap();
       } else {
-        await createAssignment({
-          title,
-          description,
-          year,
-          semester,
-          deadline,
-        });
+        await dispatch(
+          createAssignment({
+            title,
+            description,
+            year: numYear,
+            semester: numSemester,
+            subject,
+            deadline,
+          })
+        ).unwrap();
       }
 
       alert("Assignment created successfully 🎉");
@@ -44,94 +72,47 @@ export default function CreateAssignment() {
       setDescription("");
       setYear("");
       setSemester("");
+      setSubject("");
       setDeadline("");
       setPdf(null);
     } catch (err) {
-      console.error(err);
-      alert("Failed to create assignment");
-    } finally {
-      setLoading(false);
+      alert(err);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-12">
-      <div
-        className="
-          bg-gradient-to-br from-[#0b1020] via-[#111836] to-[#0b1020]
-          border border-slate-700/50
-          rounded-3xl shadow-2xl
-          p-10 text-white
-        "
-      >
-        {/* ===== Header ===== */}
-        <div className="mb-10">
-          <h2 className="text-3xl font-bold tracking-wide flex items-center gap-2">
-            📝 Create Assignment
-          </h2>
-          <p className="text-sm opacity-70 mt-2">
-            Publish assignments by selecting academic year and semester
+    <div className="max-w-3xl mx-auto mt-12 px-4">
+      <div className="clean-panel p-8 sm:p-10">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">📝 Create Assignment</h2>
+          <p className="text-slate-500 mt-2">
+            Publish coursework, materials, and deadlines for your students.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-
-          {/* ===== Title ===== */}
-          <div>
-            <label className="block text-sm mb-2 opacity-70">
-              Assignment Title
-            </label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-900 block">Assignment Title</label>
             <input
-              type="text"
-              placeholder="e.g. Data Structures – Assignment 3"
+              placeholder="e.g., Assignment 1: React Fundamentals"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="
-                w-full px-4 py-3 rounded-xl
-                bg-slate-800 border border-slate-700
-                focus:outline-none focus:ring-2 focus:ring-indigo-500
-              "
+              className="clean-input"
             />
           </div>
 
-          {/* ===== Description ===== */}
-          <div>
-            <label className="block text-sm mb-2 opacity-70">
-              Description
-            </label>
-            <textarea
-              placeholder="Explain the assignment briefly..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-              rows={4}
-              className="
-                w-full px-4 py-3 rounded-xl
-                bg-slate-800 border border-slate-700
-                focus:outline-none focus:ring-2 focus:ring-indigo-500
-                resize-none
-              "
-            />
-          </div>
-
-          {/* ===== Year & Semester ===== */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm mb-2 opacity-70">
-                Academic Year
-              </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-900 block">Target Year</label>
               <select
                 value={year}
-                onChange={(e) => setYear(e.target.value)}
+                onChange={handleYearChange}
                 required
-                className="
-                  w-full px-4 py-3 rounded-xl
-                  bg-slate-800 border border-slate-700
-                  focus:outline-none focus:ring-2 focus:ring-indigo-500
-                "
+                className="clean-input cursor-pointer appearance-none bg-no-repeat"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em' }}
               >
-                <option value="">Select Year</option>
+                <option value="">Select Year...</option>
                 <option value="1">First Year</option>
                 <option value="2">Second Year</option>
                 <option value="3">Third Year</option>
@@ -139,87 +120,98 @@ export default function CreateAssignment() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm mb-2 opacity-70">
-                Semester
-              </label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-900 block">Target Semester</label>
               <select
                 value={semester}
-                onChange={(e) => setSemester(e.target.value)}
+                onChange={handleSemesterChange}
                 required
-                className="
-                  w-full px-4 py-3 rounded-xl
-                  bg-slate-800 border border-slate-700
-                  focus:outline-none focus:ring-2 focus:ring-indigo-500
-                "
+                className="clean-input cursor-pointer appearance-none bg-no-repeat"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em' }}
               >
-                <option value="">Select Semester</option>
-                <option value="1">Semester 1</option>
-                <option value="2">Semester 2</option>
+                <option value="">Select Semester...</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
               </select>
             </div>
           </div>
 
-          {/* ===== Deadline ===== */}
-          <div>
-            <label className="block text-sm mb-2 opacity-70">
-              Submission Deadline
-            </label>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-900 block">Subject</label>
+            {availableSubjects.length > 0 ? (
+              <select
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                required
+                className="clean-input cursor-pointer appearance-none bg-no-repeat"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em' }}
+              >
+                <option value="">Select a subject...</option>
+                {availableSubjects.map((subj) => (
+                  <option key={subj} value={subj}>{subj}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                placeholder={year && semester ? "Enter Subject manually" : "Select Year & Semester first"}
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                required
+                disabled={!(year && semester)}
+                className="clean-input"
+              />
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-900 block">Description</label>
+            <textarea
+              placeholder="Provide context, requirements, and instructions..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+              rows={4}
+              className="clean-input min-h-[100px] resize-y"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-900 block">Deadline</label>
             <input
               type="date"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
               required
-              className="
-                w-full px-4 py-3 rounded-xl
-                bg-slate-800 border border-slate-700
-                focus:outline-none focus:ring-2 focus:ring-indigo-500
-              "
+              className="clean-input text-slate-600"
             />
           </div>
 
-          {/* ===== PDF Upload ===== */}
-          <div>
-            <label className="block text-sm mb-3 opacity-70">
-              Assignment PDF (optional)
-            </label>
-
-            <label
-              className="
-                flex items-center justify-between
-                px-5 py-4 rounded-2xl cursor-pointer
-                bg-slate-800 border border-dashed border-slate-600
-                hover:border-indigo-500 transition
-              "
-            >
-              <span className="text-sm opacity-80 truncate">
-                {pdf ? `📄 ${pdf.name}` : "Click to upload assignment PDF"}
-              </span>
-              <span className="text-xs bg-indigo-600 px-4 py-1 rounded-full">
-                Browse
-              </span>
-
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-900 block">Assignment Document (PDF)</label>
+            <div className="border border-dashed border-slate-300 rounded-lg p-4 bg-slate-50 flex items-center justify-center">
               <input
                 type="file"
                 accept="application/pdf"
                 onChange={(e) => setPdf(e.target.files[0])}
-                className="hidden"
+                className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 transition-colors"
               />
-            </label>
+            </div>
           </div>
 
-          {/* ===== Submit ===== */}
           <button
             type="submit"
             disabled={loading}
-            className="
-              w-full py-4 rounded-2xl font-semibold
-              bg-indigo-600 hover:bg-indigo-500
-              transition disabled:opacity-60
-              text-lg
-            "
+            className="clean-button w-full h-11 text-base mt-4"
           >
-            {loading ? "Creating Assignment..." : "🚀 Publish Assignment"}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Publishing...
+              </span>
+            ) : "🚀 Publish Assignment"}
           </button>
         </form>
       </div>

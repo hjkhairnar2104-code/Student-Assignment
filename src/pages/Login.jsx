@@ -1,8 +1,12 @@
 import { useState } from "react";
-import { login } from "../api/authapi";
-import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../store/authSlice";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Login() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading } = useSelector((state) => state.auth);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,97 +17,110 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await login({ email, password });
-      console.log("LOGIN RESPONSE:", res);
-
-      if (!res.success) {
-        setError(res.message || "Invalid email or password");
-        return;
-      }
-
-      localStorage.setItem("token", res.token);
-      localStorage.setItem("role", res.role);
-      localStorage.setItem("userId", res.userId);
+      const res = await dispatch(
+        loginUser({ email, password })
+      ).unwrap();
 
       if (res.role === "ROLE_TEACHER") {
-        window.location.href = "/teacher";
+        navigate("/teacher");
       } else if (res.role === "ROLE_STUDENT") {
-        window.location.href = "/student";
+        navigate("/student");
       } else {
-        alert("Role not assigned. Contact admin.");
+        setError("Role not assigned. Contact admin.");
       }
-
     } catch (err) {
-      console.error("LOGIN ERROR:", err);
-      setError("Invalid email or password");
+      setError(err || "Invalid email or password");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-purple-900 to-black px-4">
+    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-slate-50 px-4 py-12">
+      <div className="w-full max-w-md">
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.25),transparent_60%)]"></div>
-
-      <form
-        onSubmit={handleLogin}
-        className="relative w-full max-w-md rounded-2xl p-[2px] bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500"
-      >
-        <div className="rounded-2xl bg-[#0b0b18]/90 backdrop-blur-xl p-8 shadow-2xl">
-
-          <h2 className="text-3xl font-bold text-center bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-            Welcome Back
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="mx-auto w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center mb-6 shadow-sm">
+            <span className="text-2xl font-bold text-white">V</span>
+          </div>
+          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
+            Welcome back
           </h2>
-
-          <p className="text-center text-gray-400 mt-2 mb-8">
-            Login to manage assignments & submissions
+          <p className="text-slate-500 mt-2">
+            Please enter your details to sign in
           </p>
-
-          <div className="mb-4">
-            <label className="text-sm text-gray-300">Email Address</label>
-            <input
-              type="email"
-              className="mt-2 w-full rounded-lg bg-[#141428] text-white px-4 py-3 outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="teacher@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="text-sm text-gray-300">Password</label>
-            <input
-              type="password"
-              className="mt-2 w-full rounded-lg bg-[#141428] text-white px-4 py-3 outline-none focus:ring-2 focus:ring-pink-500"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          {error && (
-            <p className="text-red-400 text-sm mb-4 text-center">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            className="w-full mt-2 py-3 rounded-lg font-semibold text-white
-            bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500
-            hover:scale-[1.02] transition-all duration-300 shadow-lg"
-          >
-            Login
-          </button>
-
-          <p className="text-center mt-4 text-sm text-gray-300">
-            Don’t have an account?{" "}
-            <Link to="/signup" className="text-blue-400 font-semibold hover:underline">
-              Sign up
-            </Link>
-          </p>
-
         </div>
-      </form>
+
+        {/* Form Card */}
+        <div className="clean-panel p-8">
+          <form onSubmit={handleLogin} className="space-y-6">
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-900 block">
+                Email Address
+              </label>
+              <input
+                type="email"
+                className="clean-input"
+                placeholder="teacher@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-slate-900 block">
+                  Password
+                </label>
+                <Link to="#" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+                  Forgot password?
+                </Link>
+              </div>
+              <input
+                type="password"
+                className="clean-input"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-600 text-sm">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="clean-button w-full h-11 text-base relative"
+            >
+              <span className="flex items-center justify-center gap-2">
+                {loading ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Signing in...
+                  </>
+                ) : "Sign in"}
+              </span>
+            </button>
+          </form>
+        </div>
+
+        {/* Footer */}
+        <p className="text-center mt-8 text-sm text-slate-600">
+          Don't have an account?{" "}
+          <Link to="/signup" className="font-semibold text-slate-900 hover:underline underline-offset-4">
+            Sign up
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
