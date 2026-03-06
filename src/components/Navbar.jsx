@@ -29,7 +29,6 @@ export default function Navbar() {
 
   const handleSearch = (e) => {
     if (e.key === "Enter" && searchQuery.trim()) {
-      // In a real app we'd trigger a router navigation here, e.g., navigate(`/search?q=${searchQuery}`)
       console.log("Searching for:", searchQuery);
       setSearchOpen(false);
       setSearchQuery("");
@@ -37,50 +36,36 @@ export default function Navbar() {
   };
 
   return (
-    <nav
-      className="
-        sticky top-0 z-50 w-full
-        bg-white
-        border-b border-slate-200 shadow-sm
-        text-slate-900
-        transition-all duration-300
-      "
-    >
+    <nav className="sticky top-0 z-50 w-full bg-white border-b border-slate-200 shadow-sm">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="flex h-20 items-center justify-between">
 
-          {/* ===== LEFT (Brand) ===== */}
+          {/* ===== BRAND ===== */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 text-white shadow-sm transition-transform duration-300 group-hover:scale-105">
-              <span className="text-lg font-bold">V</span>
+            <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-900 text-white font-bold">
+              V
             </div>
-            <span className="text-lg font-bold tracking-tight text-slate-900">
-              Vault
-            </span>
+            <span className="text-lg font-bold">Vault</span>
           </Link>
 
-          {/* ===== CENTER (Desktop Links) ===== */}
+          {/* ===== DESKTOP NAV ===== */}
           <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <Link
-              to="/"
-              className={`relative px-1 py-2 transition-colors duration-300 ${isActive('/') && location.pathname === '/' ? 'text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-900'}`}
-            >
-              Home
-            </Link>
 
-            {/* Course Year Dropdown */}
+            <NavLink to="/" active={location.pathname === "/"}>Home</NavLink>
+
+            {/* Course Year */}
             <div
-              className="relative py-2"
+              className="relative"
               onMouseEnter={() => setServicesOpen(true)}
               onMouseLeave={() => setServicesOpen(false)}
             >
-              <button className="flex items-center gap-1 text-slate-500 hover:text-slate-900 transition-colors duration-300">
+              <button className="flex items-center gap-1 text-slate-500 hover:text-slate-900">
                 Course Year
-                <svg className={`w-4 h-4 transition-transform duration-300 ${servicesOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                <Chevron open={servicesOpen} />
               </button>
 
               {servicesOpen && (
-                <div className="absolute top-10 left-1/2 -translate-x-1/2 w-48 rounded-md bg-white border border-slate-200 shadow-md py-1 animate-in fade-in zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95">
+                <div className="absolute top-10 left-1/2 -translate-x-1/2 w-48 bg-white border rounded-md shadow-md">
                   <DropdownItem to="/courseyear/1">First Year</DropdownItem>
                   <DropdownItem to="/courseyear/2">Second Year</DropdownItem>
                   <DropdownItem to="/courseyear/3">Third Year</DropdownItem>
@@ -89,140 +74,108 @@ export default function Navbar() {
               )}
             </div>
 
-            <Link to="/aboutus" className={`relative px-1 py-2 transition-colors duration-300 ${isActive('/aboutus') ? 'text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-900'}`}>
-              About Us
-            </Link>
+            <NavLink to="/aboutus" active={isActive("/aboutus")}>About Us</NavLink>
+            <NavLink to="/contactus" active={isActive("/contactus")}>Contact Us</NavLink>
 
-            <Link to="/contactus" className={`relative px-1 py-2 transition-colors duration-300 ${isActive('/contactus') ? 'text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-900'}`}>
-              Contact Us
-            </Link>
-
-            {/* Role-based Links */}
+            {/* ROLE LINKS */}
             {role === "ROLE_STUDENT" && (
-              <Link to="/student/assignments" className={`relative px-1 py-2 transition-colors duration-300 ${isActive('/student') ? 'text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-900'}`}>
+              <NavLink to="/student/assignments" active={isActive("/student")}>
                 My Assignments
-              </Link>
+              </NavLink>
             )}
 
             {role === "ROLE_TEACHER" && (
-              <Link to="/teacher/create-assignment" className={`relative px-1 py-2 transition-colors duration-300 ${isActive('/teacher/create-assignment') ? 'text-slate-900 font-semibold' : 'text-slate-500 hover:text-slate-900'}`}>
-                Create Assignment
-              </Link>
+              <>
+                <NavLink to="/teacher/assignments" active={isActive("/teacher/assignments")}>
+                  My Assignments
+                </NavLink>
+                <NavLink to="/teacher/create-assignment" active={isActive("/teacher/create-assignment")}>
+                  Create Assignment
+                </NavLink>
+              </>
             )}
           </div>
 
-          {/* ===== RIGHT (Actions & Search) ===== */}
-          <div className="flex items-center gap-4 relative" ref={searchRef}>
+          {/* ===== RIGHT ===== */}
+          <div className="flex items-center gap-4" ref={searchRef}>
 
-            {/* Search Icon */}
+            {/* Search */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 text-slate-500 hover:text-slate-900 transition-colors rounded-full hover:bg-slate-100"
-              aria-label="Search"
+              className="p-2 rounded-full hover:bg-slate-100"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              🔍
             </button>
 
-            {/* Search Dropdown */}
             {searchOpen && (
-              <div className="absolute right-0 md:right-auto md:left-0 top-12 w-64 md:w-[320px] rounded-md bg-white border border-slate-200 p-3 shadow-md animate-in fade-in slide-in-from-top-2 origin-top-right">
-                <div className="relative">
-                  <input
-                    type="text"
-                    autoFocus
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={handleSearch}
-                    placeholder="Search courses..."
-                    className="w-full bg-white border border-slate-300 rounded-md pl-9 pr-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all placeholder-slate-400"
-                  />
-                  <svg className="absolute left-3 top-2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
+              <div className="absolute right-4 top-20 w-64 bg-white border rounded-md p-3 shadow-md">
+                <input
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearch}
+                  placeholder="Search..."
+                  className="w-full border rounded-md px-3 py-1.5 text-sm"
+                />
               </div>
             )}
 
-            {/* Auth Buttons */}
             {isAuthenticated ? (
-              <div className="hidden md:flex items-center gap-4">
-                <span className="hidden lg:inline-block px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              <div className="hidden md:flex items-center gap-3">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100">
                   {role === "ROLE_STUDENT" ? "Student" : "Teacher"}
                 </span>
                 <Logout />
               </div>
             ) : (
-              <div className="hidden md:flex items-center gap-3">
-                <Link to="/login" className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-                  Log in
-                </Link>
-                <Link to="/signup" className="clean-button h-9 px-4">
-                  Sign up
-                </Link>
+              <div className="hidden md:flex gap-3">
+                <Link to="/login">Login</Link>
+                <Link to="/signup" className="clean-button">Sign up</Link>
               </div>
             )}
 
-            {/* Mobile Menu Toggle */}
+            {/* Mobile toggle */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 text-slate-600 hover:text-slate-900"
+              className="md:hidden p-2"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {mobileOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                )}
-              </svg>
+              ☰
             </button>
           </div>
-
         </div>
       </div>
 
       {/* ===== MOBILE MENU ===== */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white shadow-md animate-in slide-in-from-top-2 origin-top">
-          <div className="px-6 py-6 flex flex-col gap-5">
+        <div className="md:hidden bg-white border-t shadow-md">
+          <div className="px-6 py-6 flex flex-col gap-4">
+
             <MobileNav to="/" setOpen={setMobileOpen}>Home</MobileNav>
-
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={() => setServicesOpen(!servicesOpen)}
-                className="flex items-center justify-between text-slate-600 hover:text-slate-900 font-medium"
-              >
-                Course Year
-                <svg className={`w-4 h-4 transition-transform ${servicesOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-              </button>
-
-              {servicesOpen && (
-                <div className="ml-4 flex flex-col gap-3 pl-4 border-l border-slate-200">
-                  <MobileNav to="/courseyear/1" setOpen={setMobileOpen} className="text-sm font-normal text-slate-500">First Year</MobileNav>
-                  <MobileNav to="/courseyear/2" setOpen={setMobileOpen} className="text-sm font-normal text-slate-500">Second Year</MobileNav>
-                  <MobileNav to="/courseyear/3" setOpen={setMobileOpen} className="text-sm font-normal text-slate-500">Third Year</MobileNav>
-                  <MobileNav to="/courseyear/4" setOpen={setMobileOpen} className="text-sm font-normal text-slate-500">Fourth Year</MobileNav>
-                </div>
-              )}
-            </div>
-
+            <MobileNav to="/courseyear/1" setOpen={setMobileOpen}>First Year</MobileNav>
+            <MobileNav to="/courseyear/2" setOpen={setMobileOpen}>Second Year</MobileNav>
+            <MobileNav to="/courseyear/3" setOpen={setMobileOpen}>Third Year</MobileNav>
+            <MobileNav to="/courseyear/4" setOpen={setMobileOpen}>Fourth Year</MobileNav>
             <MobileNav to="/aboutus" setOpen={setMobileOpen}>About Us</MobileNav>
             <MobileNav to="/contactus" setOpen={setMobileOpen}>Contact Us</MobileNav>
 
-            {isAuthenticated ? (
-              <div className="pt-4 mt-2 border-t border-slate-200 flex flex-col gap-4">
-                <MobileNav to={`/${role === 'ROLE_STUDENT' ? 'student/assignments' : 'teacher/create-assignment'}`} setOpen={setMobileOpen} className="text-slate-900">
-                  {role === 'ROLE_STUDENT' ? 'My Assignments' : 'Create Assignment'}
-                </MobileNav>
-                <div onClick={() => setMobileOpen(false)}>
-                  <Logout />
-                </div>
-              </div>
-            ) : (
-              <div className="pt-4 mt-2 border-t border-slate-200 flex flex-col gap-3">
-                <MobileNav to="/login" setOpen={setMobileOpen} className="font-normal text-slate-600">Log in</MobileNav>
-                <Link to="/signup" onClick={() => setMobileOpen(false)} className="clean-button w-full text-center">
-                  Sign up
-                </Link>
-              </div>
+            {role === "ROLE_STUDENT" && (
+              <MobileNav to="/student/assignments" setOpen={setMobileOpen}>
+                My Assignments
+              </MobileNav>
             )}
+
+            {role === "ROLE_TEACHER" && (
+              <>
+                <MobileNav to="/teacher/assignments" setOpen={setMobileOpen}>
+                  My Assignments
+                </MobileNav>
+                <MobileNav to="/teacher/create-assignment" setOpen={setMobileOpen}>
+                  Create Assignment
+                </MobileNav>
+              </>
+            )}
+
+            {isAuthenticated ? <Logout /> : null}
           </div>
         </div>
       )}
@@ -230,23 +183,45 @@ export default function Navbar() {
   );
 }
 
-/* ===== Reusable Components ===== */
+/* ===== Helpers ===== */
 
-const DropdownItem = ({ to, children }) => (
+const NavLink = ({ to, active, children }) => (
   <Link
     to={to}
-    className="relative flex items-center px-4 py-2 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+    className={`px-1 py-2 ${
+      active ? "text-slate-900 font-semibold" : "text-slate-500 hover:text-slate-900"
+    }`}
   >
     {children}
   </Link>
 );
 
-const MobileNav = ({ to, setOpen, children, className = "" }) => (
+const DropdownItem = ({ to, children }) => (
   <Link
     to={to}
-    onClick={() => setOpen(false)}
-    className={`text-slate-600 hover:text-slate-900 font-medium transition-colors ${className}`}
+    className="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-100"
   >
     {children}
   </Link>
+);
+
+const MobileNav = ({ to, setOpen, children }) => (
+  <Link
+    to={to}
+    onClick={() => setOpen(false)}
+    className="text-slate-600 hover:text-slate-900 font-medium"
+  >
+    {children}
+  </Link>
+);
+
+const Chevron = ({ open }) => (
+  <svg
+    className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""}`}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+  </svg>
 );

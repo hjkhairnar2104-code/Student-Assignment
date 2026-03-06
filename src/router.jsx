@@ -11,6 +11,7 @@ import AssignmentList from "./pages/student/AssignmentList";
 import AssignmentsByYear from "./pages/student/AssignmentsByYear";
 import CreateAssignment from "./pages/teacher/CreateAssignment";
 import PrivateRoute from "./components/PrivateRoute";
+import TeacherAssignments from "./pages/teacher/TeacherAssignments";
 
 export const router = createBrowserRouter([
   {
@@ -44,6 +45,9 @@ export const router = createBrowserRouter([
         ),
       },
 
+
+
+      // ===== TEACHER =====
       // ===== TEACHER =====
       {
         path: "teacher",
@@ -61,6 +65,15 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
+      {
+        path: "teacher/assignments",
+        element: (
+          <PrivateRoute role="ROLE_TEACHER">
+            <TeacherAssignments />
+          </PrivateRoute>
+        ),
+      },
+      
 
       // ===== NEW ROUTES =====
       {

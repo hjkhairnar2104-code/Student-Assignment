@@ -137,32 +137,35 @@ export default function CreateAssignment() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-900 block">Subject</label>
-            {availableSubjects.length > 0 ? (
-              <select
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                required
-                className="clean-input cursor-pointer appearance-none bg-no-repeat"
-                style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em' }}
-              >
-                <option value="">Select a subject...</option>
-                {availableSubjects.map((subj) => (
-                  <option key={subj} value={subj}>{subj}</option>
-                ))}
-              </select>
-            ) : (
-              <input
-                placeholder={year && semester ? "Enter Subject manually" : "Select Year & Semester first"}
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                required
-                disabled={!(year && semester)}
-                className="clean-input"
-              />
-            )}
-          </div>
+  <label className="text-sm font-medium text-slate-900 block">
+    Subject
+  </label>
 
+  <select
+    value={subject}
+    onChange={(e) => setSubject(e.target.value)}
+    required
+    disabled={availableSubjects.length === 0}
+    className="clean-input cursor-pointer appearance-none bg-no-repeat disabled:bg-slate-100 disabled:text-slate-400"
+    style={{
+      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+      backgroundPosition: "right 0.5rem center",
+      backgroundSize: "1.5em 1.5em",
+    }}
+  >
+    <option value="">
+      {availableSubjects.length === 0
+        ? "Select Year & Semester first"
+        : "Select Subject"}
+    </option>
+
+    {availableSubjects.map((subj) => (
+      <option key={subj} value={subj}>
+        {subj}
+      </option>
+    ))}
+  </select>
+</div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-900 block">Description</label>
             <textarea

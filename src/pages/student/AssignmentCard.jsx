@@ -2,6 +2,8 @@ import { useState } from "react";
 import { isNewAssignment, getCountdown } from "./AssignmentUtils";
 import API from "../../api/api";
 
+
+
 // Deterministically pick an accent hue from the subject name
 const SUBJECT_COLORS = [
   {
@@ -38,7 +40,7 @@ function getAccent(str = "") {
 
 export default function AssignmentCard({ assignment }) {
   const [loading, setLoading] = useState(false);
-
+  const hasPdf = assignment.hasPdf === true;
   const countdown = getCountdown(assignment.deadline);
   const expired = countdown === "Expired";
 
@@ -53,50 +55,66 @@ export default function AssignmentCard({ assignment }) {
     return res;
   };
 
-  const handleView = async () => {
-    if (!assignmentId) {
-      alert("Assignment ID missing.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetchBlob(
-        `/file/assignment-pdf/view/${assignmentId}`,
-      );
-      const url = URL.createObjectURL(
-        new Blob([res.data], { type: "application/pdf" }),
-      );
-      window.open(url, "_blank");
-    } catch {
-      alert("Failed to open PDF.");
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleView = async () => {
+  if (!hasPdf) {
+    alert("PDF not uploaded for this assignment.");
+    return;
+  }
 
-  const handleDownload = async () => {
-    if (!assignmentId) {
-      alert("Assignment ID missing.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetchBlob(
-        `/file/assignment-pdf/${assignmentId}`,
-      );
-      const url = URL.createObjectURL(new Blob([res.data]));
-      const a = document.createElement("a");
-      a.href = url;
-      a.setAttribute("download", `assignment-${assignmentId}.pdf`);
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch {
-      alert("Failed to download PDF.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!assignmentId) {
+    alert("Assignment ID missing.");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const res = await fetchBlob(
+      `/file/assignment-pdf/view/${assignmentId}`
+    );
+    const url = URL.createObjectURL(
+      new Blob([res.data], { type: "application/pdf" })
+    );
+    window.open(url, "_blank");
+    URL.revokeObjectURL(url);
+  } catch {
+    alert("Failed to open PDF.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+ const handleDownload = async () => {
+  if (!hasPdf) {
+    alert("PDF not uploaded for this assignment.");
+    return;
+  }
+
+  if (!assignmentId) {
+    alert("Assignment ID missing.");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const res = await fetchBlob(
+      `/file/assignment-pdf/${assignmentId}`
+    );
+    const url = URL.createObjectURL(
+      new Blob([res.data], { type: "application/pdf" })
+    );
+    const a = document.createElement("a");
+    a.href = url;
+    a.setAttribute("download", `assignment-${assignmentId}.pdf`);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch {
+    alert("Failed to download PDF.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ── Render ─────────────────────────────────────────────────
   return (
