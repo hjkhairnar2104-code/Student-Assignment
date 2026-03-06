@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { FiSearch } from "react-icons/fi";
 import Logout from "./Logout";
 
 export default function Navbar() {
@@ -10,17 +11,22 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
+  const [mobileCourseOpen, setMobileCourseOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const searchRef = useRef(null);
+  const servicesRef = useRef(null);
 
   const isActive = (path) => location.pathname.startsWith(path);
 
-  // Close search on outside click
+  // Close search/dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setSearchOpen(false);
+      }
+      if (servicesRef.current && !servicesRef.current.contains(e.target)) {
+        setServicesOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -56,20 +62,22 @@ export default function Navbar() {
             {/* Course Year */}
             <div
               className="relative"
-              onMouseEnter={() => setServicesOpen(true)}
-              onMouseLeave={() => setServicesOpen(false)}
+              ref={servicesRef}
             >
-              <button className="flex items-center gap-1 text-slate-500 hover:text-slate-900">
+              <button
+                onClick={() => setServicesOpen(!servicesOpen)}
+                className="flex items-center gap-1 text-slate-500 hover:text-slate-900"
+              >
                 Course Year
                 <Chevron open={servicesOpen} />
               </button>
 
               {servicesOpen && (
-                <div className="absolute top-10 left-1/2 -translate-x-1/2 w-48 bg-white border rounded-md shadow-md">
-                  <DropdownItem to="/courseyear/1">First Year</DropdownItem>
-                  <DropdownItem to="/courseyear/2">Second Year</DropdownItem>
-                  <DropdownItem to="/courseyear/3">Third Year</DropdownItem>
-                  <DropdownItem to="/courseyear/4">Fourth Year</DropdownItem>
+                <div className="absolute top-10 left-1/2 -translate-x-1/2 w-48 bg-white border-none rounded-md shadow-md ring-1 ring-slate-900/5">
+                  <DropdownItem to="/courseyear/1" onClick={() => setServicesOpen(false)}>First Year</DropdownItem>
+                  <DropdownItem to="/courseyear/2" onClick={() => setServicesOpen(false)}>Second Year</DropdownItem>
+                  <DropdownItem to="/courseyear/3" onClick={() => setServicesOpen(false)}>Third Year</DropdownItem>
+                  <DropdownItem to="/courseyear/4" onClick={() => setServicesOpen(false)}>Fourth Year</DropdownItem>
                 </div>
               )}
             </div>
@@ -102,20 +110,20 @@ export default function Navbar() {
             {/* Search */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 rounded-full hover:bg-slate-100"
+              className="p-2 rounded-full hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
             >
-              🔍
+              <FiSearch className="w-5 h-5" />
             </button>
 
             {searchOpen && (
-              <div className="absolute right-4 top-20 w-64 bg-white border rounded-md p-3 shadow-md">
+              <div className="absolute right-4 top-20 w-64 bg-white border-none rounded-md p-3 shadow-md ring-1 ring-slate-900/5">
                 <input
                   autoFocus
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleSearch}
                   placeholder="Search..."
-                  className="w-full border rounded-md px-3 py-1.5 text-sm"
+                  className="w-full border-none bg-slate-50 focus:ring-1 focus:ring-slate-200 rounded-md px-3 py-1.5 text-sm"
                 />
               </div>
             )}
@@ -128,8 +136,8 @@ export default function Navbar() {
                 <Logout />
               </div>
             ) : (
-              <div className="hidden md:flex gap-3">
-                <Link to="/login">Login</Link>
+              <div className="hidden md:flex items-center gap-4">
+                <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Login</Link>
                 <Link to="/signup" className="clean-button">Sign up</Link>
               </div>
             )}
@@ -151,10 +159,27 @@ export default function Navbar() {
           <div className="px-6 py-6 flex flex-col gap-4">
 
             <MobileNav to="/" setOpen={setMobileOpen}>Home</MobileNav>
-            <MobileNav to="/courseyear/1" setOpen={setMobileOpen}>First Year</MobileNav>
-            <MobileNav to="/courseyear/2" setOpen={setMobileOpen}>Second Year</MobileNav>
-            <MobileNav to="/courseyear/3" setOpen={setMobileOpen}>Third Year</MobileNav>
-            <MobileNav to="/courseyear/4" setOpen={setMobileOpen}>Fourth Year</MobileNav>
+
+            {/* Mobile Course Year Dropdown */}
+            <div className="flex flex-col">
+              <button
+                onClick={() => setMobileCourseOpen(!mobileCourseOpen)}
+                className="flex items-center justify-between text-slate-600 hover:text-slate-900 font-medium"
+              >
+                Course Year
+                <Chevron open={mobileCourseOpen} />
+              </button>
+
+              <div className={`overflow-hidden transition-all duration-300 ease-in-out ${mobileCourseOpen ? 'max-h-60 mt-4 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="flex flex-col gap-4 pl-4 border-l-2 border-slate-100 ml-2">
+                  <MobileNav to="/courseyear/1" setOpen={setMobileOpen}>First Year</MobileNav>
+                  <MobileNav to="/courseyear/2" setOpen={setMobileOpen}>Second Year</MobileNav>
+                  <MobileNav to="/courseyear/3" setOpen={setMobileOpen}>Third Year</MobileNav>
+                  <MobileNav to="/courseyear/4" setOpen={setMobileOpen}>Fourth Year</MobileNav>
+                </div>
+              </div>
+            </div>
+
             <MobileNav to="/aboutus" setOpen={setMobileOpen}>About Us</MobileNav>
             <MobileNav to="/contactus" setOpen={setMobileOpen}>Contact Us</MobileNav>
 
@@ -188,9 +213,8 @@ export default function Navbar() {
 const NavLink = ({ to, active, children }) => (
   <Link
     to={to}
-    className={`px-1 py-2 ${
-      active ? "text-slate-900 font-semibold" : "text-slate-500 hover:text-slate-900"
-    }`}
+    className={`px-1 py-2 ${active ? "text-slate-900 font-semibold" : "text-slate-500 hover:text-slate-900"
+      }`}
   >
     {children}
   </Link>
