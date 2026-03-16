@@ -39,44 +39,135 @@
       transform: translateX(-50%);
     }
   }
+
+  /* Abstract shapes and blobs */
+  @keyframes blob {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+  }
+
+  /* Floating elements */
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+      transform: translateY(-20px) rotate(5deg);
+    }
+  }
+
+  @keyframes float-reverse {
+
+    0%,
+    100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+      transform: translateY(-15px) rotate(-5deg);
+    }
+  }
+
+  --animate-blob: blob 9s infinite;
+  --animate-float-slow: float 18s ease-in-out infinite;
+  --animate-float-medium: float-reverse 12s ease-in-out infinite;
+  --animate-float-fast: float 8s ease-in-out infinite;
+
+  /* Ripple button */
+  @keyframes ripple {
+    0% {
+      transform: scale(0);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+  --animate-ripple: ripple 0.65s linear forwards;
+
+  /* Skeleton shimmer */
+  @keyframes shimmer {
+    100% { transform: translateX(200%); }
+  }
+
+  /* Neon glow pulse */
+  @keyframes neon-glow {
+    0%, 100% { box-shadow: 0 0 4px #6366f1, 0 0 16px #6366f180; }
+    50%       { box-shadow: 0 0 8px #6366f1, 0 0 32px #6366f1a0, 0 0 64px #8b5cf640; }
+  }
+  --animate-neon-glow: neon-glow 2.5s ease-in-out infinite;
+
+  /* Gradient spinning border */
+  @keyframes spin-border {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 }
 
 @layer base {
   body {
-    @apply antialiased bg-slate-50 text-slate-900;
+    @apply antialiased text-white;
     font-family: var(--font-sans);
+    background: #0a0a1b;
   }
+
 
   /* Modern crisp scrollbar */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #13132b; }
+  ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.5); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(139,92,246,0.7); }
 }
 
 @layer utilities {
   .clean-panel {
-    @apply bg-white border border-slate-200 shadow-sm rounded-xl transition-all duration-300;
+    @apply bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl rounded-2xl transition-all duration-300;
   }
 
   .clean-input {
-    @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors;
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:opacity-50 transition-all;
   }
 
   .clean-button {
-    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-white bg-slate-900 text-slate-50 hover:bg-slate-900/90 h-10 py-2 px-4;
+    @apply inline-flex items-center justify-center rounded-xl text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 h-10 py-2 px-4;
+  }
+
+  /* For 3D tilt cards */
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  /* Animated underline for nav links */
+  .nav-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .nav-underline:hover::after {
+    transform: scaleX(1);
   }
 }
