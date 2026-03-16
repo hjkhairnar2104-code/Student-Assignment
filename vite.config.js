@@ -8,24 +8,25 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
+    host: true,
     proxy: {
       '/auth': {
-        target: 'http://10.90.2.173:8080',
+        target: 'http://10.203.243.24:8080',
         changeOrigin: true,
         secure: false,
       },
       '/assignment': {
-        target: 'http://10.90.2.173:8080',
+        target: 'http://10.203.243.24:8080',
         changeOrigin: true,
         secure: false,
       },
       '/api': {
-        target: 'http://10.90.2.173:8080',
+        target: 'http://10.203.243.24:8080',
         changeOrigin: true,
         secure: false,
       },
       '/file': {
-        target: 'http://10.90.2.173:8080',
+        target: 'http://10.203.243.24:8080',
         changeOrigin: true,
         secure: false,
       }
